@@ -39,15 +39,18 @@ class ViewController: UIViewController {
             enter()
         }
         
-    switch operation {
+        switch operation {
         case "×": performOperation { $0 * $1 }
         case "÷": performOperation { $1 / $0 }
         case "+": performOperation { $0 + $1 }
         case "−": performOperation { $1 - $0 }
-        case "√": performOperation {sqrt($0)}
+        case "√": performOperation { sqrt($0) }
+        case "sin": performOperation { sin($0) }
+        case "cos": performOperation { cos($0) }
+        case "π": performOperation()
         default: break
+        }
     }
-}
     
     func performOperation(operation: (Double, Double) -> Double) {
         if operandStack.count >= 2 {
@@ -57,10 +60,15 @@ class ViewController: UIViewController {
     }
     
     func performOperation(operation: Double -> Double) {
-        if operandStack.count >= 2 {
+        if operandStack.count >= 1 {
             displayValue = operation(operandStack.removeLast())
             enter()
         }
+    }
+    
+    func performOperation() {
+        displayValue = M_PI
+        enter()
     }
 
     @IBAction func enter() {
