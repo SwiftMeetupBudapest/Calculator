@@ -10,8 +10,10 @@ import UIKit
 
 class ViewController: UIViewController {
     @IBOutlet weak var display: UILabel!
-    
+    @IBOutlet weak var history: UILabel!
+
     var userIsInTheMiddleOfTypingANumber = false
+    var userIsPerformedAnOperation = false
     
     @IBAction func appendDigit(sender: UIButton) {
         let digit = sender.currentTitle!
@@ -27,6 +29,9 @@ class ViewController: UIViewController {
                 display.text = digit
             }
             userIsInTheMiddleOfTypingANumber = true
+            if userIsPerformedAnOperation {
+                history.text = ""
+            }
         }
         
     }
@@ -35,6 +40,7 @@ class ViewController: UIViewController {
     
     @IBAction func operate(sender: UIButton) {
         let operation = sender.currentTitle!
+        history.text = history.text! + " " + operation
         if userIsInTheMiddleOfTypingANumber {
             enter()
         }
@@ -50,29 +56,33 @@ class ViewController: UIViewController {
         case "π": performOperation()
         default: break
         }
+        userIsPerformedAnOperation = true
+        enter()
     }
     
     func performOperation(operation: (Double, Double) -> Double) {
         if operandStack.count >= 2 {
             displayValue = operation(operandStack.removeLast(), operandStack.removeLast())
-            enter()
         }
     }
     
     func performOperation(operation: Double -> Double) {
         if operandStack.count >= 1 {
             displayValue = operation(operandStack.removeLast())
-            enter()
         }
     }
     
     func performOperation() {
         displayValue = M_PI
-        enter()
     }
 
     @IBAction func enter() {
         userIsInTheMiddleOfTypingANumber = false
+        if userIsPerformedAnOperation {
+            userIsPerformedAnOperation = false
+        } else {
+            history.text = history.text! + " " + display.text!
+        }
         operandStack.append(displayValue)
         println("operandStack = \(operandStack)")
     }
@@ -86,6 +96,11 @@ class ViewController: UIViewController {
             display.text = "\(newValue)"
             userIsInTheMiddleOfTypingANumber = false
         }
+    }
+    @IBAction func clear(sender: UIButton) {
+        history.text = ""
+        display.text = ""
+        operandStack = []
     }
 }
 
