@@ -60,6 +60,7 @@ class ViewController: UIViewController {
         case "sin": performOperation { sin($0) }
         case "cos": performOperation { cos($0) }
         case "π": performOperation()
+        case "±": performOperation { $0 * -1 }
         default: break
         }
         userIsPerformedAnOperation = true
