@@ -21,6 +21,12 @@ class ViewController: UIViewController {
             if digit == "." && (display.text?.rangeOfString(".") != nil) {
                 return // invalid input
             }
+            if digit == "0" && display.text == "0" { return
+            }
+            if display.text == "0" {
+                display.text = digit
+                return
+            }
             display.text = display.text! + digit
         } else {
             if digit == "." {
@@ -80,6 +86,7 @@ class ViewController: UIViewController {
         userIsInTheMiddleOfTypingANumber = false
         if userIsPerformedAnOperation {
             userIsPerformedAnOperation = false
+            history.text = history.text! + "="
         } else {
             history.text = history.text! + " " + display.text!
         }
@@ -97,10 +104,20 @@ class ViewController: UIViewController {
             userIsInTheMiddleOfTypingANumber = false
         }
     }
+    
     @IBAction func clear(sender: UIButton) {
         history.text = ""
-        display.text = ""
+        display.text = "0"
         operandStack = []
     }
+    
+    @IBAction func backspace(sender: UIButton) {
+        if countElements(display.text!) > 1 {
+            display.text = dropLast(display.text!)
+        } else {
+            clear(sender)
+        }
+    }
+    
 }
 

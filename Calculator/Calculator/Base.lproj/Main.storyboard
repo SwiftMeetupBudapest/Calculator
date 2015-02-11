@@ -18,7 +18,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fFW-wB-dUv">
-                                <rect key="frame" x="321" y="28" width="263" height="39"/>
+                                <rect key="frame" x="298" y="28" width="239" height="39"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="32"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -224,7 +224,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jyA-xQ-mdZ">
-                                <rect key="frame" x="50" y="28" width="263" height="39"/>
+                                <rect key="frame" x="50" y="28" width="240" height="39"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="32"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -241,9 +241,23 @@
                                     <action selector="clear:" destination="BYZ-38-t0r" eventType="touchUpInside" id="iFJ-KG-E85"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ndu-uN-gUY">
+                                <rect key="frame" x="545" y="28" width="39" height="39"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="39" id="oqC-hV-kGa"/>
+                                    <constraint firstAttribute="width" constant="39" id="sDO-Yp-jb1"/>
+                                </constraints>
+                                <state key="normal" title="⇐">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="backspace:" destination="BYZ-38-t0r" eventType="touchUpInside" id="dsA-gw-Yat"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="Ndu-uN-gUY" firstAttribute="leading" secondItem="fFW-wB-dUv" secondAttribute="trailing" constant="8" id="0OR-20-con"/>
                             <constraint firstAttribute="trailingMargin" secondItem="nHk-J5-3HV" secondAttribute="trailing" constant="8" id="0lB-pN-Ksh"/>
                             <constraint firstItem="TSc-Ls-Ioc" firstAttribute="leading" secondItem="bpf-Ft-ojh" secondAttribute="trailing" constant="8" id="1fq-nh-gRI"/>
                             <constraint firstItem="wdd-eN-2Az" firstAttribute="leading" secondItem="a2p-bu-POO" secondAttribute="trailing" constant="8" id="1xZ-il-e7F"/>
@@ -257,6 +271,7 @@
                             <constraint firstItem="Vb3-Zy-cIs" firstAttribute="top" secondItem="eA9-jz-Kya" secondAttribute="bottom" constant="8" id="7KY-th-pvD"/>
                             <constraint firstItem="AgF-Qg-k6k" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="8" id="7Na-Ct-0aA"/>
                             <constraint firstItem="hyL-rH-ubO" firstAttribute="width" secondItem="VkZ-sY-PME" secondAttribute="width" id="7Te-JE-ked"/>
+                            <constraint firstItem="Ndu-uN-gUY" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="8ir-7n-DS7"/>
                             <constraint firstItem="jyA-xQ-mdZ" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="8wa-G6-Lfg"/>
                             <constraint firstItem="hyL-rH-ubO" firstAttribute="height" secondItem="AgF-Qg-k6k" secondAttribute="height" id="90D-lp-KlK"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="jmj-Tj-uhc" secondAttribute="bottom" constant="8" id="ACU-Aa-H5h"/>
@@ -322,6 +337,7 @@
                             <constraint firstItem="hyL-rH-ubO" firstAttribute="width" secondItem="wdd-eN-2Az" secondAttribute="width" id="isV-Nc-5Su"/>
                             <constraint firstItem="LYP-6K-auD" firstAttribute="leading" secondItem="2if-6o-zLP" secondAttribute="trailing" constant="8" id="jQ2-dg-d0X"/>
                             <constraint firstItem="8PX-b8-mVa" firstAttribute="leading" secondItem="eA9-jz-Kya" secondAttribute="trailing" constant="8" id="jaG-0z-glI"/>
+                            <constraint firstItem="Ndu-uN-gUY" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="8" id="jd8-Vc-0Vy"/>
                             <constraint firstItem="tXs-iU-VQC" firstAttribute="top" secondItem="wdd-eN-2Az" secondAttribute="bottom" constant="8" id="jo4-y9-0DV"/>
                             <constraint firstItem="eA9-jz-Kya" firstAttribute="top" secondItem="bpf-Ft-ojh" secondAttribute="bottom" constant="8" id="jrf-Bv-Gwd"/>
                             <constraint firstItem="hyL-rH-ubO" firstAttribute="width" secondItem="jmj-Tj-uhc" secondAttribute="width" id="kWg-f3-Iln"/>
@@ -336,6 +352,7 @@
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="iyz-AB-6eM" secondAttribute="bottom" constant="8" id="viN-YV-a1r"/>
                             <constraint firstItem="6O8-jB-cLV" firstAttribute="leading" secondItem="VkZ-sY-PME" secondAttribute="trailing" constant="8" id="w8S-kh-SIl"/>
                             <constraint firstItem="jyA-xQ-mdZ" firstAttribute="leading" secondItem="E18-Yy-NJo" secondAttribute="trailing" constant="8" id="war-Mm-FJn"/>
+                            <constraint firstItem="TSc-Ls-Ioc" firstAttribute="top" secondItem="Ndu-uN-gUY" secondAttribute="bottom" constant="8" id="wfS-dW-24k"/>
                             <constraint firstItem="hyL-rH-ubO" firstAttribute="width" secondItem="bpf-Ft-ojh" secondAttribute="width" id="xCf-Eq-cqa"/>
                             <constraint firstItem="hyL-rH-ubO" firstAttribute="height" secondItem="6O8-jB-cLV" secondAttribute="height" id="xJa-RA-jSJ"/>
                             <constraint firstItem="hyL-rH-ubO" firstAttribute="height" secondItem="nHk-J5-3HV" secondAttribute="height" id="xMf-lh-UP7"/>
@@ -348,6 +365,7 @@
                             <mask key="constraints">
                                 <exclude reference="8wa-G6-Lfg"/>
                                 <exclude reference="T5q-in-ryi"/>
+                                <exclude reference="rLd-0Q-kVZ"/>
                             </mask>
                         </variation>
                     </view>
@@ -358,7 +376,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="103" y="265"/>
+            <point key="canvasLocation" x="174" y="265"/>
         </scene>
     </scenes>
 </document>
