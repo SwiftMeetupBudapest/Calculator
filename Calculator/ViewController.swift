@@ -16,7 +16,8 @@ class ViewController: UIViewController {
     
     // MARK: Instance variables
     var userIsInTheMiddleOfTyping: Bool = false
-    var operandStack: Array<Double> = Array<Double>()
+//    var operandStack: Array<Double> = Array<Double>()
+    var brain = CalculatorBrain()
 
     // MARK: ViewController methods
     override func viewDidLoad() {
@@ -31,8 +32,8 @@ class ViewController: UIViewController {
     }
 
     @IBAction func clearAll() {
-        operandStack.removeAll(keepCapacity: false)
-        digitsLabel.text = "0"
+//        operandStack.removeAll(keepCapacity: false)
+        displayValue = nil
         historyLabel.text = ""
     }
     
@@ -59,91 +60,63 @@ class ViewController: UIViewController {
     
     @IBAction func enter() {
         userIsInTheMiddleOfTyping = false
-        operandStack.append(displayValue)
-        historyLabel.text = historyLabel.text! + " " + digitsLabel.text!
-        println("operandStack = \(operandStack)")
+        if let result = brain.pushOperand(displayValue!) {
+            historyLabel.text = historyLabel.text! + " " + digitsLabel.text!
+            displayValue = result
+        } else {
+            displayValue = 0
+        }
     }
 
     @IBAction func operate(sender: AnyObject) {
-        let operation = sender.currentTitle!
         if userIsInTheMiddleOfTyping {
             enter()
         }
         
-        historyLabel.text = historyLabel.text! + " " + operation!
-        
-        var result: Double = 0;
-        switch operation! {
-            case "×":
-//                performOperation(*)
-//                performOperation({$0 * $1})
-                performOperation { $0 * $1 }
-            case "÷":
-                performOperation() {
-                    (op1: Double, op2: Double)  -> Double in
-                    if (op2 == 0) {
-                        return 0
-                    } else {
-                        return op2 / op1
-                    }
-                }
-            case "+":
-                performOperation {$0 + $1}
-            case "−":
-                performOperation {$1 - $0}
-            case "√":
-                performOperation {sqrt($0)}
-            case "sin":
-                performOperation {sqrt($0)}
-            case "cos":
-                performOperation {sqrt($0)}
-            case "π":
-                performOperationPi()
-            
-            default: break
+        if let operation = sender.currentTitle! {
+            historyLabel.text = historyLabel.text! + " " + operation
+            if let result = brain.performOperation(operation) {
+                historyLabel.text = historyLabel.text! + " = \(result)"
+                displayValue = result
+            } else {
+                displayValue = 0
+            }
             
         }
+        
     }
     
     @IBAction func invert() {
-        let num = displayValue
         println("\(displayValue)")
-        displayValue = -1 * num
-        if !userIsInTheMiddleOfTyping {
-            operandStack[operandStack.count - 1] = displayValue
+        if let num = displayValue {
+            if !userIsInTheMiddleOfTyping {
+                brain.performOperation("∓")
+            } else {
+                displayValue = -1 * num
+            }
         }
     }
     
     // MARK: Computed variables
-    var displayValue: Double {
+    var displayValue: Double? {
         get {
             var textValue = "0"
             if let text = digitsLabel.text {
                 textValue = text
             }
-            return NSNumberFormatter().numberFromString(textValue)!.doubleValue
+            if let dValue = NSNumberFormatter().numberFromString(textValue)?.doubleValue {
+                return dValue
+            } else {
+                return nil
+            }
         }
         set {
-            digitsLabel.text = "\(newValue)"
+            if newValue == nil {
+                digitsLabel.text = ""
+            } else {
+                digitsLabel.text = "\(newValue!)"
+            }
         }
-    }
-    
-    func performOperation(operation: (Double, Double) -> Double) {
-        if operandStack.count >= 2 {
-            historyLabel.text =  "="
-            displayValue = operation(operandStack.removeLast(), operandStack.removeLast())
-            enter()
-        }
-        
-    }
-
-    func performOperation(operation: Double -> Double) {
-        if operandStack.count >= 1 {
-            historyLabel.text = historyLabel.text! + "="
-            displayValue = operation(operandStack.removeLast())
-            enter()
-        }
-        
     }
     
     func performOperationPi() {
