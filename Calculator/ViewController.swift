@@ -108,6 +108,7 @@ class ViewController: UIViewController {
         if let symbol = sender.currentTitle {
             setVariable(symbol, value: M_PI)
             brain.pushOperand(symbol)
+            historyLabel.text = brain.description
         }
     }
     

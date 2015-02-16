@@ -30,6 +30,7 @@
                                 <rect key="frame" x="16" y="57" width="568" height="38.5"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="38.5" id="IzP-iu-AZE"/>
+                                    <constraint firstAttribute="height" constant="38.5" id="nBa-Hy-Sd1"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="32"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
