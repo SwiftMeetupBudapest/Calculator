@@ -94,19 +94,30 @@ class ViewController: UIViewController {
             } else {
                 displayValue = 0
             }
-            
         }
         
     }
 
     func setVariable(symbol: String, value: Double) {
         brain.variableValues[symbol] = value
+        userIsInTheMiddleOfTyping = false
     }
 
     
+    @IBAction func replaceVariable(sender: UIButton) {
+        if let symbol = sender.currentTitle {
+            if let dVal = displayValue {
+                let modSymbol = symbol.stringByReplacingOccurrencesOfString("→", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+                setVariable(modSymbol, value: dVal)
+                historyLabel.text = brain.description
+                displayValue = brain.evaluate()
+            }
+        }
+    }
+    
     @IBAction func addVariable(sender: UIButton) {
         if let symbol = sender.currentTitle {
-            setVariable(symbol, value: M_PI)
+            setVariable(symbol, value: displayValue!)
             brain.pushOperand(symbol)
             historyLabel.text = brain.description
         }
