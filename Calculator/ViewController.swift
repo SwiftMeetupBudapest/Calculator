@@ -84,16 +84,17 @@ class ViewController: UIViewController {
                     if let num = displayValue {
                         displayValue = -1 * num
                     }
+                    historyLabel.text = brain.description
                     return
                 }
                 enter()
             }
             if let result = brain.performOperation(operation) {
-                historyLabel.text = brain.description
                 displayValue = result
             } else {
                 displayValue = 0
             }
+            historyLabel.text = brain.description
         }
         
     }
@@ -116,10 +117,14 @@ class ViewController: UIViewController {
     }
     
     @IBAction func addVariable(sender: UIButton) {
+        if (userIsInTheMiddleOfTyping) {
+            enter()
+        }
         if let symbol = sender.currentTitle {
-            setVariable(symbol, value: displayValue!)
+//            setVariable(symbol, value: displayValue!)
             brain.pushOperand(symbol)
             historyLabel.text = brain.description
+            brain.evaluate()
         }
     }
     
