@@ -18,6 +18,7 @@ class ViewController: UIViewController {
     var userIsInTheMiddleOfTyping: Bool = false
 //    var operandStack: Array<Double> = Array<Double>()
     var brain = CalculatorBrain()
+    let decimalSeparator = NSNumberFormatter().decimalSeparator ?? "."
 
     // MARK: ViewController methods
     override func viewDidLoad() {
@@ -34,7 +35,9 @@ class ViewController: UIViewController {
     @IBAction func clearAll() {
 //        operandStack.removeAll(keepCapacity: false)
         displayValue = nil
-        historyLabel.text = ""
+        brain.reset()
+        historyLabel.text = brain.description
+        userIsInTheMiddleOfTyping = false
     }
     
     // MARK: Actions
@@ -60,11 +63,12 @@ class ViewController: UIViewController {
     
     @IBAction func enter() {
         userIsInTheMiddleOfTyping = false
-        if let result = brain.pushOperand(displayValue!) {
-            historyLabel.text = historyLabel.text! + " " + digitsLabel.text!
-            displayValue = result
-        } else {
-            displayValue = 0
+        if let dValue = displayValue {
+            if let result = brain.pushOperand(dValue) {
+                historyLabel.text = brain.description
+            } else {
+                displayValue = 0
+            }
         }
     }
 
@@ -87,11 +91,11 @@ class ViewController: UIViewController {
     }
     
     @IBAction func invert() {
-        println("\(displayValue)")
-        if let num = displayValue {
-            if !userIsInTheMiddleOfTyping {
-                brain.performOperation("∓")
-            } else {
+        println("invert \(displayValue)")
+        if !userIsInTheMiddleOfTyping {
+            brain.performOperation("∓")
+        } else {
+            if let num = displayValue {
                 displayValue = -1 * num
             }
         }
@@ -102,8 +106,9 @@ class ViewController: UIViewController {
         get {
             var textValue = "0"
             if let text = digitsLabel.text {
-                textValue = text
+                textValue = text.stringByReplacingOccurrencesOfString(".", withString: decimalSeparator, options: NSStringCompareOptions.LiteralSearch, range: nil);
             }
+            println(textValue)
             if let dValue = NSNumberFormatter().numberFromString(textValue)?.doubleValue {
                 return dValue
             } else {
