@@ -31,6 +31,7 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
 
     @IBAction func clearAll() {
 //        operandStack.removeAll(keepCapacity: false)
@@ -62,6 +63,10 @@ class ViewController: UIViewController {
     }
     
     @IBAction func enter() {
+        if (!userIsInTheMiddleOfTyping) {
+            return
+        }
+
         userIsInTheMiddleOfTyping = false
         if let dValue = displayValue {
             if let result = brain.pushOperand(dValue) {
@@ -73,14 +78,18 @@ class ViewController: UIViewController {
     }
 
     @IBAction func operate(sender: AnyObject) {
-        if userIsInTheMiddleOfTyping {
-            enter()
-        }
-        
         if let operation = sender.currentTitle! {
-            historyLabel.text = historyLabel.text! + " " + operation
+            if userIsInTheMiddleOfTyping {
+                if (operation == "∓") {
+                    if let num = displayValue {
+                        displayValue = -1 * num
+                    }
+                    return
+                }
+                enter()
+            }
             if let result = brain.performOperation(operation) {
-                historyLabel.text = historyLabel.text! + " = \(result)"
+                historyLabel.text = brain.description
                 displayValue = result
             } else {
                 displayValue = 0
@@ -89,15 +98,16 @@ class ViewController: UIViewController {
         }
         
     }
+
+    func setVariable(symbol: String, value: Double) {
+        brain.variableValues[symbol] = value
+    }
+
     
-    @IBAction func invert() {
-        println("invert \(displayValue)")
-        if !userIsInTheMiddleOfTyping {
-            brain.performOperation("∓")
-        } else {
-            if let num = displayValue {
-                displayValue = -1 * num
-            }
+    @IBAction func addVariable(sender: UIButton) {
+        if let symbol = sender.currentTitle {
+            setVariable(symbol, value: M_PI)
+            brain.pushOperand(symbol)
         }
     }
     
@@ -106,7 +116,8 @@ class ViewController: UIViewController {
         get {
             var textValue = "0"
             if let text = digitsLabel.text {
-                textValue = text.stringByReplacingOccurrencesOfString(".", withString: decimalSeparator, options: NSStringCompareOptions.LiteralSearch, range: nil);
+                // Replacing locale dependent decimal separator
+                textValue = text.stringByReplacingOccurrencesOfString(".", withString: decimalSeparator, options: NSStringCompareOptions.LiteralSearch, range: nil)
             }
             println(textValue)
             if let dValue = NSNumberFormatter().numberFromString(textValue)?.doubleValue {
@@ -123,12 +134,7 @@ class ViewController: UIViewController {
             }
         }
     }
-    
-    func performOperationPi() {
-        displayValue = M_PI
-        enter()
-    }
-    
+        
     @IBAction func backSpace() {
         if !userIsInTheMiddleOfTyping {
             return
