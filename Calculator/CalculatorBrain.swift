@@ -9,11 +9,23 @@
 import Foundation
 
 class CalculatorBrain {
-    private enum Op {
+    private enum Op: Printable {
         case Operand(Double)
         case UnartOperation(String, Double -> Double)
         case BinaryOperation(String, (Double, Double) -> Double)
         
+        var description: String {
+            get {
+                switch self {
+                case .Operand(let operand):
+                    return "\(operand)"
+                case .UnartOperation(let symbol, _):
+                    return "\(symbol)"
+                case .BinaryOperation(let symbol, _):
+                    return "\(symbol)"
+                }
+            }
+        }
     }
     
     private var opStack = [Op]()
@@ -21,11 +33,15 @@ class CalculatorBrain {
     private var knownOps = [String:Op]()
     
     init() {
-        knownOps["×"] = Op.BinaryOperation("×", *)
-        knownOps["÷"] = Op.BinaryOperation("÷") { $1 / $0 }
-        knownOps["+"] = Op.BinaryOperation("+", +)
-        knownOps["−"] = Op.BinaryOperation("−") { $1 - $0 }
-        knownOps["√"] = Op.UnartOperation("√", sqrt)
+        func learnOp(op: Op) {
+            knownOps[op.description] = op
+        }
+        
+        learnOp(Op.BinaryOperation("×", *))
+        learnOp(Op.BinaryOperation("÷") { $1 / $0 })
+        learnOp(Op.BinaryOperation("+", +))
+        learnOp(Op.BinaryOperation("−") { $1 - $0 })
+        learnOp(Op.UnartOperation("√", sqrt))
     }
     
     private func evaluate(ops:[Op]) -> (result: Double?, reaminingOps: [Op]) {
@@ -38,7 +54,7 @@ class CalculatorBrain {
             case .UnartOperation(_, let operation):
                 let operandEvaluation = evaluate(remainingOps)
                 if let operand = operandEvaluation.result {
-                    return (operand, operandEvaluation.reaminingOps)
+                    return (operation(operand), operandEvaluation.reaminingOps)
                 }
             case .BinaryOperation(_, let operation):
                 let op1Evaluation = evaluate(remainingOps)
@@ -47,8 +63,6 @@ class CalculatorBrain {
                     if let operand2 = op2Evaluation.result {
                         return (operation(operand1, operand2), op2Evaluation.reaminingOps)
                     }
-
-                    return (operand1, op1Evaluation.reaminingOps)
                 }
             }
         }
@@ -57,16 +71,19 @@ class CalculatorBrain {
     
     func evaluate() -> Double? {
         let (result, remainder) = evaluate(opStack)
+        println("\(opStack) = \(result) with \(remainder) left over")
         return result
     }
     
-    func pushOperand(operand: Double) {
+    func pushOperand(operand: Double) -> Double? {
         opStack.append(Op.Operand(operand))
+        return evaluate()
     }
     
-    func performOperation(symbol: String) {
+    func performOperation(symbol: String) -> Double? {
         if let operation = knownOps[symbol] {
             opStack.append(operation)
         }
+        return evaluate()
     }
 }
