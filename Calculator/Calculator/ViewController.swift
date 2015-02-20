@@ -2,9 +2,12 @@
 //  ViewController.swift
 //  Calculator
 //
+
+
 //  Created by Gabor L Lizik on 01/02/15.
 //  Copyright (c) 2015 Gabor L Lizik. All rights reserved.
-//
+
+// Változzon meg
 
 import UIKit
 
