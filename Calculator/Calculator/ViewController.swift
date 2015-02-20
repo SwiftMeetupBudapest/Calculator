@@ -1,127 +1,143 @@
 //
 //  ViewController.swift
-//  Calculator
+//  Kalkulator
 //
-
-
-//  Created by Gabor L Lizik on 01/02/15.
-//  Copyright (c) 2015 Gabor L Lizik. All rights reserved.
-
-// Változzon meg
+//  Created by Petneházi Károly on 2015.02.12..
+//  Copyright (c) 2015 Petneházi Károly. All rights reserved.
+//
 
 import UIKit
 
 class ViewController: UIViewController {
+    
+    
     @IBOutlet weak var display: UILabel!
+    
     @IBOutlet weak var history: UILabel!
-
-    var userIsInTheMiddleOfTypingANumber = false
-    var userIsPerformedAnOperation = false
+    
+    var userTyped = false
+    
+    var brain = KalkulatorBrain()
+    
     
     @IBAction func appendDigit(sender: UIButton) {
-        let digit = sender.currentTitle!
-        if userIsInTheMiddleOfTypingANumber {
-            if digit == "." && (display.text?.rangeOfString(".") != nil) {
-                return // invalid input
-            }
-            if digit == "0" && display.text == "0" { return
-            }
-            if display.text == "0" {
+        let digit =  sender.currentTitle!
+        let doted = display.text?.rangeOfString(".")
+        
+        //println("digit = \(digit)")
+        
+        if (digit !=  "." || display.text?.rangeOfString(".") == nil ) {
+            
+            //printhistory(digit)
+            
+            if userTyped {
+                display.text = display.text! + digit
+            }else {
                 display.text = digit
-                return
-            }
-            display.text = display.text! + digit
-        } else {
-            if digit == "." {
-                display.text = "0."
-            } else {
-                display.text = digit
-            }
-            userIsInTheMiddleOfTypingANumber = true
-            if userIsPerformedAnOperation {
-                history.text = ""
+                userTyped = true
             }
         }
         
     }
     
-    var operandStack = Array<Double>()
     
-    @IBAction func operate(sender: UIButton) {
-        let operation = sender.currentTitle!
-        history.text = history.text! + " " + operation
-        if userIsInTheMiddleOfTypingANumber {
-            enter()
-        }
-        
-        switch operation {
-        case "×": performOperation { $0 * $1 }
-        case "÷": performOperation { $1 / $0 }
-        case "+": performOperation { $0 + $1 }
-        case "−": performOperation { $1 - $0 }
-        case "√": performOperation { sqrt($0) }
-        case "sin": performOperation { sin($0) }
-        case "cos": performOperation { cos($0) }
-        case "π": performOperation()
-        case "±": performOperation { $0 * -1 }
-        default: break
-        }
-        userIsPerformedAnOperation = true
-        enter()
-    }
-    
-    func performOperation(operation: (Double, Double) -> Double) {
-        if operandStack.count >= 2 {
-            displayValue = operation(operandStack.removeLast(), operandStack.removeLast())
-        }
-    }
-    
-    func performOperation(operation: Double -> Double) {
-        if operandStack.count >= 1 {
-            displayValue = operation(operandStack.removeLast())
-        }
-    }
-    
-    func performOperation() {
-        displayValue = M_PI
-    }
-
-    @IBAction func enter() {
-        userIsInTheMiddleOfTypingANumber = false
-        if userIsPerformedAnOperation {
-            userIsPerformedAnOperation = false
-            history.text = history.text! + "="
-        } else {
-            history.text = history.text! + " " + display.text!
-        }
-        operandStack.append(displayValue)
-        println("operandStack = \(operandStack)")
-    }
-    
-    // computed properties, convert string to double
-    var displayValue: Double {
+    var displayValue : Double? {
         get {
             return NSNumberFormatter().numberFromString(display.text!)!.doubleValue
         }
         set {
-            display.text = "\(newValue)"
-            userIsInTheMiddleOfTypingANumber = false
+            display.text = newValue == nil ? "" : "\(newValue!)"
+            userTyped = false
         }
     }
     
-    @IBAction func clear(sender: UIButton) {
-        history.text = ""
-        display.text = "0"
-        operandStack = []
-    }
     
-    @IBAction func backspace(sender: UIButton) {
-        if countElements(display.text!) > 1 {
-            display.text = dropLast(display.text!)
-        } else {
-            clear(sender)
+    // Hogy tudom megtekinteni egy valtozo vagy func elofordulasait highlight vagy valami? ctrl+cmd+f ctrl+cmd+r
+    // Minek nevezzuk a dollaros valtozokat amik az attributumra hivatkoznak? (numberedparams)
+    // Hogy tudok behuzast alkalmazni, mint a tab, ami xcode-ban torli a kijelolest? cmd+[
+    
+    @IBAction func enter() {
+        if(displayValue != nil){
+            
+            userTyped = false
+            let result = brain.pushOperand(displayValue!)
+            
+            printhistory("ENTER")
+            displayValue = result
+            history.text = brain.description
+            
         }
     }
+    
+    /*
+    muveleti gomb: digitek kozott nem ervenyes csak a vegen
+    */
+    @IBAction func operate(sender: UIButton) {
+        let operation =  sender.currentTitle!
+        
+        println("operation label = \(operation)")
+        //printhistory(operation)
+        
+        if userTyped {
+            enter()
+        }
+        if let result = brain.performOperation(operation){
+            
+            displayValue = result
+            history.text = brain.description
+            
+        }else{
+            displayValue = nil
+            printhistory("ERR")
+        }
+        
+    }
+    
+    
+    
+    // elválasztó vagy minusz jel vagy C vagy PI
+    @IBAction func sign(sender: UIButton) {
+        let signo =  sender.currentTitle!
+        printhistory(signo)
+        
+        switch signo {
+        case "ᐩ/-": if displayValue != nil {
+            displayValue = displayValue! * -1
+            }
+        case "C":   history.text = ""
+        displayValue = nil
+        brain.pushSign(signo)
+        userTyped = false
+        case "CE", "π":
+            let result = brain.pushSign(signo)
+            displayValue = result?
+            history.text = brain.description
+        case ".":   appendDigit(sender)
+            
+        case "M":
+            let result = brain.pushOperand(signo)
+            displayValue = result?
+        case "→M":
+            let result = brain.pushOperand(signo)
+            brain.variableValues[signo] = displayValue
+            displayValue = result?
+            
+        default :   break
+        }
+    }
+    
+    
+    
+    
+    func printhistory(msg: String) {
+        if (history.text != nil) {
+            history.text = history.text! + " " + "\(msg)"
+        }else{
+            history.text = "\(msg)"
+        }
+    }
+    
     
 }
 
+ 
