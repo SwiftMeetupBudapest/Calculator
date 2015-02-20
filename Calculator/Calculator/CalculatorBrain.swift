@@ -8,7 +8,7 @@
 
 import Foundation
 
-class KalkulatorBrain {
+class CalculatorBrain {
  
     private enum Op{
         

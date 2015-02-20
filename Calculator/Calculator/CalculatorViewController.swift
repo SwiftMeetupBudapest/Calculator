@@ -17,7 +17,7 @@ class ViewController: UIViewController {
     
     var userTyped = false
     
-    var brain = KalkulatorBrain()
+    var brain = CalculatorBrain()
  
    
     @IBAction func appendDigit(sender: UIButton) {
