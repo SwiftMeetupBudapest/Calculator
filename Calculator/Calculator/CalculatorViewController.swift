@@ -43,14 +43,19 @@ class ViewController: UIViewController {
     
     var displayValue : Double? {
         get {
-            return NSNumberFormatter().numberFromString(display.text!)!.doubleValue
+            return NSNumberFormatter().numberFromString(display.text!.stringByReplacingOccurrencesOfString("=", withString: ""))!.doubleValue
         }
         set {
             display.text = newValue == nil ? "" : "\(newValue!)"
             userTyped = false
         }
     }
-    
+
+    func displayResult(result : Double?) {
+        display.text = result == nil ? "" : "=\(result!)"
+        userTyped = false
+    }
+
     
     // Hogy tudom megtekinteni egy valtozo vagy func elofordulasait highlight vagy valami? ctrl+cmd+f ctrl+cmd+r
     // Minek nevezzuk a dollaros valtozokat amik az attributumra hivatkoznak? (numberedparams)
@@ -63,7 +68,7 @@ class ViewController: UIViewController {
             let result = brain.pushOperand(displayValue!)
             
             printhistory("ENTER")
-            displayValue = result
+            //displayResult(result)
             history.text = brain.description
         
         }
@@ -83,7 +88,7 @@ class ViewController: UIViewController {
         }
         if let result = brain.performOperation(operation){
             
-            displayValue = result
+            displayResult(result)
             history.text = brain.description
             
         }else{
@@ -98,29 +103,40 @@ class ViewController: UIViewController {
     // elválasztó vagy minusz jel vagy C vagy PI
     @IBAction func sign(sender: UIButton) {
         let signo =  sender.currentTitle!
-        printhistory(signo)
+       // printhistory(signo)
         
         switch signo {
-        case "ᐩ/-": if displayValue != nil {
-                        displayValue = displayValue! * -1
-                    }
-        case "C":   history.text = ""
-                    displayValue = nil
-                    brain.pushSign(signo)
-                    userTyped = false
-        case "CE", "π":
-                    let result = brain.pushSign(signo)
-                    displayValue = result?
-                    history.text = brain.description
-        case ".":   appendDigit(sender)
+        case "ᐩ/-":
+            if displayValue != nil {
+                displayValue = displayValue! * -1
+            }
+        case "C":
+            history.text = ""
+            displayValue = nil
+            brain.performOperation(signo)
+            userTyped = false
+        case "CE":
+            let result = brain.performOperation(signo)
+            displayResult(result)
+            history.text = brain.description
+        case ".":
+            appendDigit(sender)
 
         case "M":
             let result = brain.pushOperand(signo)
-            displayValue = result?
+            displayResult(result)
         case "→M":
+            
+            if(displayValue != nil){
+                brain.variableValues.updateValue(displayValue!, forKey: signo)
+                let result = brain.evaluate()
+                displayResult(result)
+            }
+            
+        case "π":
+            brain.variableValues.updateValue(M_PI, forKey: signo)
             let result = brain.pushOperand(signo)
-            brain.variableValues[signo] = displayValue
-            displayValue = result?
+            displayResult(result)
             
         default :   break
         }
@@ -135,6 +151,8 @@ class ViewController: UIViewController {
         }else{
             history.text = "\(msg)"
         }
+        
+        println(history.text)
     }
     
        

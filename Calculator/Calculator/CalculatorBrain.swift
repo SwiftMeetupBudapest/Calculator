@@ -53,7 +53,7 @@ class CalculatorBrain {
             let op = remOps.removeLast()
             switch op{
             case .Operand(let operand):
-                                return (operand.description, remOps)
+                                return (toFlatValue(operand.description), remOps)
                 
             case .UnaryOperation(let symbol, let operation):
                 
@@ -66,10 +66,14 @@ class CalculatorBrain {
                 if let operand1 = opeval.result {
                     let opeval2 = calculateHistory(opeval.remainingOps, symbol)
                     if let operand2 = opeval2.result {
+                        
+                        let o1 = toFlatValue(operand1)
+                        let o2 = toFlatValue(operand2)
+                        
                         if preSymbol != nil && preSymbol != symbol {
-                            return ("(\(operand2) \(symbol) \(operand1))", opeval2.remainingOps)
+                            return ("(\(o2) \(symbol) \(o1))", opeval2.remainingOps)
                         }else{
-                            return ("\(operand2) \(symbol) \(operand1)", opeval2.remainingOps)
+                            return ("\(o2) \(symbol) \(o1)", opeval2.remainingOps)
                         }
                         
                     }
@@ -80,6 +84,17 @@ class CalculatorBrain {
             }
         }
         return (nil, ops)
+    }
+    
+    ///
+    /// Round not nil double contained parameter to double or int. Remove zeros at the parameter end.
+    ///
+    func toFlatValue(numericHolder : String) ->String {
+        let d1 = (numericHolder as NSString).doubleValue
+        if d1 % 1 == 0 {
+            return Int(d1).description
+        }
+        return d1.description
     }
     
     
@@ -99,47 +114,68 @@ class CalculatorBrain {
     
     private func evaluate(ops: [Op]) ->  (result: Double?, remOps: [Op]) {
     
+        var step = "start in ["+(", ".join(ops.map({ "(\($0.description))" })))+"]"
+        debug(step)
+        
         if(!ops.isEmpty){
             var remOps = ops
             let op = remOps.removeLast()
             switch op{
             case .Operand(let operand):
-                debug("<\(operand)>")
+                debug("var \(operand)")
                 return (operand, remOps)
             case .UnaryOperation(let symbol, let operation):
   
                 debug("\(symbol) evaluate...")
+                step = symbol
                 
                 let opeval = evaluate(remOps)
                 if let operand = opeval.result {
+                    debug("\(symbol)(\(operand)) evaluated")
                     return (operation(operand), opeval.remOps)
+                }else{
+                    debug("\(symbol)(?) nil")
                 }
                 
             case .BinaryOperation(let symbol, let operation):
+               
+                debug("\(symbol)(a,b) evaluate...")
                 
-                debug("\(symbol) evaluate...")
+                step = symbol
                 
                 let opeval = evaluate(remOps)
+                
                 if let operand1 = opeval.result {
                     let opeval2 = evaluate(opeval.remOps)
                     if let operand2 = opeval2.result {
+                        debug("\(symbol)(\(operand1),\(operand2)) evaluated")
                         return (operation(operand1, operand2), opeval2.remOps)
+                    }else{
+                        debug("\(symbol)(a,?) nil")
                     }
+                }else{
+                    debug("\(symbol)(?,b) nil")
                 }
+                
             case .Variable(let symbol):
-                debug("\(symbol):\(variableValues[symbol]!)")
+                
+                debug("eval \(symbol):\(variableValues[symbol])")
                 return (variableValues[symbol], remOps)
             }
         }
+        debug("\(step) failed")
         return (nil, ops)
     }
     
     func evaluate() -> Double? {
-        debug("evaluate()...")
+        debug("-----------------")
+        debug(nil)
+        debug("stack evaluate()...")
         let (result, _) = evaluate(opStack)
         return result
     }
     
+    /// Ertekek beillesztese es teljes kiertekeles
     func pushOperand(operand: Double) -> Double?{
         
         debug("pushOperand number")
@@ -154,63 +190,48 @@ class CalculatorBrain {
     
     
     
-    /*
-        Valtozok letrehozasa, inicializalasa es kinyerese.
-    */
+    ///  Valtozok beillesztese es teljes kiertekeles
     func pushOperand(symbol: String) -> Double?{
    
-        if symbol == "→M" || symbol == "π"{
-            variableValues.updateValue(-0, forKey: symbol)
-        }
+        debug("pushOperand \(symbol)")
         
-        debug(nil)
-        
-        return evaluate()
-    }
-    
-    func performOperation(symbol: String) -> Double?{
-
         if let operation = knowOps[symbol]{
             opStack.append(operation)
         }
+        
+        debug(nil)
+        
+        return evaluate()
+    }
+    
+    /// Muveletek beillesztese es teljes kiertekeles
+    func performOperation(symbol: String) -> Double?{
+        
+        debug("performOperation \(symbol)")
+        
+        if symbol == "C"{
+            opStack.removeAll()
+            variableValues.removeAll()
+        }else if symbol == "CE"{
+            if !opStack.isEmpty {
+                opStack.removeLast()
+            }
+        }else if let operation = knowOps[symbol]{
+            opStack.append(operation)
+        }
+        
+        
         debug(nil)
 
         return evaluate()
     }
     
-    func pushSign(symbol: String?) -> Double?{
-        
-        var result: Double?
-        
-        if symbol! == "C"{
-            opStack.removeAll()
-        }else if symbol! == "CE"{
-            if !opStack.isEmpty {
-                opStack.removeLast()
-//                switch opStack.removeLast() {
-//                case .Operand(_):
-//                    result = ops
-//                }
-            }
-        }else if symbol! == "π"{
-            
-            pushOperand(symbol!)
-            performOperation(symbol!)
-            variableValues[symbol!] = M_PI
-            println("set PI \(variableValues)")
-            result = M_PI
-        }
-        
-        debug(nil)
-    
-        return result
-    }
-   
     func debug( extraData: String? ){
         if extraData != nil {
             println(extraData!)
         }else{
             println("["+(", ".join(opStack.map({ "(\($0.description))" })))+"]")
+            println(variableValues)
         }
     }
     
