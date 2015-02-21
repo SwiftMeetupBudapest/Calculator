@@ -128,7 +128,7 @@ class ViewController: UIViewController {
         case "→M":
             
             if(displayValue != nil){
-                brain.variableValues.updateValue(displayValue!, forKey: signo)
+                brain.variableValues.updateValue(displayValue!, forKey: "M")
                 let result = brain.evaluate()
                 displayResult(result)
             }
