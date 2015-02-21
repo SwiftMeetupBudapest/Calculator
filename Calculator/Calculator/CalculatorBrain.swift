@@ -40,18 +40,47 @@ class CalculatorBrain {
     private var knowOps = Dictionary<String, Op>()
     var variableValues = Dictionary<String, Double>()
     
-    var description: String {
+    var description: String? {
         get {
-            return calculateHistory()
+            return calculateHistory(opStack, nil).result
+
         }
     }
     
-    
-    
-    func calculateHistory() -> String{
-        return "description"
+    private func calculateHistory(ops : [Op], _ preSymbol: String?) -> (result: String?, remainingOps: [Op]) {
+        if(!ops.isEmpty){
+            var remOps = ops
+            let op = remOps.removeLast()
+            switch op{
+            case .Operand(let operand):
+                                return (operand.description, remOps)
+                
+            case .UnaryOperation(let symbol, let operation):
+                
+                let opeval = calculateHistory(remOps, symbol)
+                return (" \(symbol)(\(opeval.result!))", opeval.remainingOps)
+                
+            case .BinaryOperation(let symbol, let operation):
+            
+                let opeval = calculateHistory(remOps, symbol)
+                if let operand1 = opeval.result {
+                    let opeval2 = calculateHistory(opeval.remainingOps, symbol)
+                    if let operand2 = opeval2.result {
+                        if preSymbol != nil && preSymbol != symbol {
+                            return ("(\(operand2) \(symbol) \(operand1))", opeval2.remainingOps)
+                        }else{
+                            return ("\(operand2) \(symbol) \(operand1)", opeval2.remainingOps)
+                        }
+                        
+                    }
+                }
+            case .Variable(let symbol):
+                
+                return (" \(symbol) ", remOps)
+            }
+        }
+        return (nil, ops)
     }
-    
     
     
     init(){
@@ -131,8 +160,7 @@ class CalculatorBrain {
     func pushOperand(symbol: String) -> Double?{
    
         if symbol == "→M" || symbol == "π"{
-        
-            variableValues.updateValue(0, forKey: symbol)
+            variableValues.updateValue(-0, forKey: symbol)
         }
         
         debug(nil)
