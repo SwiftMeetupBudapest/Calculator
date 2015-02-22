@@ -60,6 +60,7 @@ class ViewController: UIViewController {
             digitsLabel.text = digit
             userIsInTheMiddleOfTyping = true
         }
+        historyLabel.text = brain.description
     }
     
     @IBAction func enter() {
@@ -94,7 +95,7 @@ class ViewController: UIViewController {
             } else {
                 displayValue = 0
             }
-            historyLabel.text = brain.description
+            historyLabel.text = brain.description + " ="
         }
         
     }
@@ -131,17 +132,7 @@ class ViewController: UIViewController {
     // MARK: Computed variables
     var displayValue: Double? {
         get {
-            var textValue = "0"
-            if let text = digitsLabel.text {
-                // Replacing locale dependent decimal separator
-                textValue = text.stringByReplacingOccurrencesOfString(".", withString: decimalSeparator, options: NSStringCompareOptions.LiteralSearch, range: nil)
-            }
-            println(textValue)
-            if let dValue = NSNumberFormatter().numberFromString(textValue)?.doubleValue {
-                return dValue
-            } else {
-                return nil
-            }
+            return NSNumberFormatter().numberFromString(digitsLabel.text!.stringByReplacingOccurrencesOfString(".", withString: decimalSeparator, options: NSStringCompareOptions.LiteralSearch, range: nil))?.doubleValue
         }
         set {
             if newValue == nil {
