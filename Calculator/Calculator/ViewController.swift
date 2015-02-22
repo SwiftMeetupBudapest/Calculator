@@ -15,6 +15,8 @@ class ViewController: UIViewController {
     var userIsInTheMiddleOfTypingANumber = false
     var userIsPerformedAnOperation = false
     
+    var brain = CalculatorBrain()
+    
     @IBAction func appendDigit(sender: UIButton) {
         let digit = sender.currentTitle!
         if userIsInTheMiddleOfTypingANumber {
@@ -36,55 +38,34 @@ class ViewController: UIViewController {
         
     }
     
-    var operandStack = Array<Double>()
     
     @IBAction func operate(sender: UIButton) {
-        let operation = sender.currentTitle!
-        history.text = history.text! + " " + operation
         if userIsInTheMiddleOfTypingANumber {
             enter()
         }
         
-        switch operation {
-        case "×": performOperation { $0 * $1 }
-        case "÷": performOperation { $1 / $0 }
-        case "+": performOperation { $0 + $1 }
-        case "−": performOperation { $1 - $0 }
-        case "√": performOperation { sqrt($0) }
-        case "sin": performOperation { sin($0) }
-        case "cos": performOperation { cos($0) }
-        case "π": performOperation()
-        default: break
-        }
-        userIsPerformedAnOperation = true
-        enter()
-    }
-    
-    func performOperation(operation: (Double, Double) -> Double) {
-        if operandStack.count >= 2 {
-            displayValue = operation(operandStack.removeLast(), operandStack.removeLast())
+        if let operation = sender.currentTitle {
+            history.text = history.text! + " " + operation
+            if let result = brain.performOperation(operation) {
+                displayValue = result
+            } else {
+                displayValue = 0
+            }
         }
     }
     
-    func performOperation(operation: Double -> Double) {
-        if operandStack.count >= 1 {
-            displayValue = operation(operandStack.removeLast())
-        }
-    }
-    
-    func performOperation() {
-        displayValue = M_PI
-    }
-
     @IBAction func enter() {
         userIsInTheMiddleOfTypingANumber = false
+        if let result = brain.pushOperand(displayValue) {
+            displayValue = result
+        } else {
+            displayValue = 0
+        }
         if userIsPerformedAnOperation {
             userIsPerformedAnOperation = false
         } else {
             history.text = history.text! + " " + display.text!
         }
-        operandStack.append(displayValue)
-        println("operandStack = \(operandStack)")
     }
     
     // computed properties, convert string to double
@@ -100,7 +81,6 @@ class ViewController: UIViewController {
     @IBAction func clear(sender: UIButton) {
         history.text = ""
         display.text = ""
-        operandStack = []
     }
 }
 
