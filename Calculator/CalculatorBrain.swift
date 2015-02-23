@@ -84,6 +84,15 @@ class CalculatorBrain {
                 if let operand1 = opeval.result {
                     let opeval2 = calculateHistory(opeval.remainingOps)
                     if let operand2 = opeval2.result {
+                        println("Op1.rem: \(opeval.remainingOps) :: \(opeval.result), Op2.rem: \(opeval2.remainingOps)  :: \(opeval2.result)")
+                        if opeval2.remainingOps.isEmpty && opeval.remainingOps.isEmpty {
+                            return ("\(operand2) \(symbol) \(operand1)", opeval2.remainingOps)
+                        }
+                        
+                        if opeval2.remainingOps.count > 1 {
+                            return ("(\(operand2)) \(symbol) \(operand1)", opeval2.remainingOps)
+                        }
+                        
                         return ("(\(operand2) \(symbol) \(operand1))", opeval2.remainingOps)
                     }
                 }
