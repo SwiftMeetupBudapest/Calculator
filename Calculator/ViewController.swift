@@ -37,7 +37,7 @@ class ViewController: UIViewController {
 //        operandStack.removeAll(keepCapacity: false)
         displayValue = nil
         brain.reset()
-        historyLabel.text = brain.description
+        updateHistoryLabel(false)
         userIsInTheMiddleOfTyping = false
     }
     
@@ -60,7 +60,7 @@ class ViewController: UIViewController {
             digitsLabel.text = digit
             userIsInTheMiddleOfTyping = true
         }
-        historyLabel.text = brain.description
+        updateHistoryLabel(false)
     }
     
     @IBAction func enter() {
@@ -71,7 +71,7 @@ class ViewController: UIViewController {
         userIsInTheMiddleOfTyping = false
         if let dValue = displayValue {
             if let result = brain.pushOperand(dValue) {
-                historyLabel.text = brain.description
+                updateHistoryLabel(false)
             } else {
                 displayValue = 0
             }
@@ -95,9 +95,8 @@ class ViewController: UIViewController {
             } else {
                 displayValue = 0
             }
-            historyLabel.text = brain.description + " ="
         }
-        
+        updateHistoryLabel(true)
     }
 
     func setVariable(symbol: String, value: Double) {
@@ -111,8 +110,8 @@ class ViewController: UIViewController {
             if let dVal = displayValue {
                 let modSymbol = symbol.stringByReplacingOccurrencesOfString("→", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
                 setVariable(modSymbol, value: dVal)
-                historyLabel.text = brain.description
                 displayValue = brain.evaluate()
+                updateHistoryLabel(true)
             }
         }
     }
@@ -124,8 +123,8 @@ class ViewController: UIViewController {
         if let symbol = sender.currentTitle {
 //            setVariable(symbol, value: displayValue!)
             brain.pushOperand(symbol)
-            historyLabel.text = brain.description
             brain.evaluate()
+            updateHistoryLabel(false)
         }
     }
     
@@ -135,6 +134,7 @@ class ViewController: UIViewController {
             return NSNumberFormatter().numberFromString(digitsLabel.text!.stringByReplacingOccurrencesOfString(".", withString: decimalSeparator, options: NSStringCompareOptions.LiteralSearch, range: nil))?.doubleValue
         }
         set {
+            println(newValue)
             if newValue == nil {
                 digitsLabel.text = ""
             } else {
@@ -142,9 +142,23 @@ class ViewController: UIViewController {
             }
         }
     }
+    
+    func updateHistoryLabel(equalSign : Bool) {
+        if brain.lastError != "" {
+            historyLabel.text = brain.lastError
+        } else {
+            historyLabel.text = brain.description
+            if equalSign {
+                historyLabel.text = historyLabel.text! + " ="
+            }
+        }
+    }
         
     @IBAction func backSpace() {
         if !userIsInTheMiddleOfTyping {
+            brain.undoLast()
+            displayValue = brain.evaluate()
+            updateHistoryLabel(false)
             return
         }
         
