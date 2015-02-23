@@ -32,7 +32,20 @@ class CalculatorBrain {
             }
         }
 
-        
+        var instance: String {
+            get {
+                switch self {
+                case .Operand(let operand):
+                    return "Operand"
+                case .UnaryOperation(let symbol, _):
+                    return "UnaryOperation"
+                case .BinaryOperation(let symbol, _):
+                    return "BinaryOperation"
+                case .Variable(let symbol):
+                    return "Variable"
+                }
+            }
+        }
 
     }
     
@@ -48,9 +61,18 @@ class CalculatorBrain {
     }
     
     private func calculateHistory(ops : [Op], _ preSymbol: String?) -> (result: String?, remainingOps: [Op]) {
+        
+        
         if(!ops.isEmpty){
             var remOps = ops
             let op = remOps.removeLast()
+            
+            
+            if (instanceOf(op, Op.Variable(""))){
+                
+            }
+
+            
             switch op{
             case .Operand(let operand):
                                 return (toFlatValue(operand.description), remOps)
@@ -67,8 +89,8 @@ class CalculatorBrain {
                     let opeval2 = calculateHistory(opeval.remainingOps, symbol)
                     if let operand2 = opeval2.result {
                         
-                        let o1 = toFlatValue(operand1)
-                        let o2 = toFlatValue(operand2)
+                        let o1 = (operand1)
+                        let o2 = (operand2)
                         
                         if preSymbol != nil && preSymbol != symbol {
                             return ("(\(o2) \(symbol) \(o1))", opeval2.remainingOps)
@@ -95,6 +117,14 @@ class CalculatorBrain {
             return Int(d1).description
         }
         return d1.description
+    }
+    
+    
+    private func instanceOf(instance :Op?, _ reference: Op?) -> Bool {
+        if instance != nil && reference != nil {
+            return instance?.instance == reference?.instance
+        }
+        return false
     }
     
     
