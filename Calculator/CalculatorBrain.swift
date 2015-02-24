@@ -277,7 +277,17 @@ class CalculatorBrain {
     
     func reset() {
         errorStack.removeAll()
+        resetStack()
+        resetVariables()
+    }
+    
+    func resetStack() {
+        println("Resetting stack")
         opStack.removeAll()
+    }
+    
+    func resetVariables() {
+        println("Resetting variables")
         variableValues.removeAll()
     }
     
