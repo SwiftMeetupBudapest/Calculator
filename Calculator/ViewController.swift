@@ -31,17 +31,19 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+
     
+    
+    
+    // MARK: Actions
 
     @IBAction func clearAll() {
-//        operandStack.removeAll(keepCapacity: false)
         displayValue = nil
         brain.reset()
         updateHistoryLabel(false)
         userIsInTheMiddleOfTyping = false
     }
     
-    // MARK: Actions
     @IBAction func appendDigit(sender: UIButton) {
         let digit = sender.currentTitle!
         println("digit = \(digit)")
@@ -90,38 +92,35 @@ class ViewController: UIViewController {
                 }
                 enter()
             }
-            if let result = brain.performOperation(operation) {
-                displayValue = result
-            } else {
-                displayValue = 0
-            }
+            displayValue = brain.performOperation(operation)
         }
         updateHistoryLabel(true)
     }
 
-    func setVariable(symbol: String, value: Double) {
-        brain.variableValues[symbol] = value
-        userIsInTheMiddleOfTyping = false
-    }
-
-    
+    // Sets the variable's value in stack
     @IBAction func replaceVariable(sender: UIButton) {
         if let symbol = sender.currentTitle {
             if let dVal = displayValue {
+                
+                // Get the variable's name
                 let modSymbol = symbol.stringByReplacingOccurrencesOfString("→", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-                setVariable(modSymbol, value: dVal)
+                
+                // Set the variable's value in brain
+                brain.variableValues[modSymbol] = dVal
+
+                userIsInTheMiddleOfTyping = false
                 displayValue = brain.evaluate()
                 updateHistoryLabel(true)
             }
         }
     }
     
+    // Adds a new variable to stack
     @IBAction func addVariable(sender: UIButton) {
         if (userIsInTheMiddleOfTyping) {
             enter()
         }
         if let symbol = sender.currentTitle {
-//            setVariable(symbol, value: displayValue!)
             brain.pushOperand(symbol)
             brain.evaluate()
             updateHistoryLabel(false)
@@ -134,30 +133,27 @@ class ViewController: UIViewController {
             return NSNumberFormatter().numberFromString(digitsLabel.text!.stringByReplacingOccurrencesOfString(".", withString: decimalSeparator, options: NSStringCompareOptions.LiteralSearch, range: nil))?.doubleValue
         }
         set {
-            println(newValue)
+            println("New value: \(newValue)")
             if newValue == nil {
-                digitsLabel.text = ""
+                // Error reporting - Autoshrink on Storyboard
+                digitsLabel.text = brain.evaluateAndReportErrors()
             } else {
                 digitsLabel.text = "\(newValue!)"
             }
         }
     }
     
+    // Error is displayed at digitsLabel
     func updateHistoryLabel(equalSign : Bool) {
-        if brain.lastError != "" {
-            historyLabel.text = brain.lastError
-        } else {
-            historyLabel.text = brain.description
-            if equalSign {
-                historyLabel.text = historyLabel.text! + " ="
-            }
+        historyLabel.text = brain.description
+        if equalSign {
+            historyLabel.text = historyLabel.text! + " ="
         }
     }
         
     @IBAction func backSpace() {
         if !userIsInTheMiddleOfTyping {
-            brain.undoLast()
-            displayValue = brain.evaluate()
+            displayValue = brain.undoLast()
             updateHistoryLabel(false)
             return
         }

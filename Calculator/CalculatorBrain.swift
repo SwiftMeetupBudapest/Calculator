@@ -50,13 +50,15 @@ class CalculatorBrain {
         }
     }
     
+    
+    // Calculated property
     var description: String? {
         get {
             var stackResults = ""
             var remainingOps = opStack
             var finished = false
             do {
-                let (result, remainder) = calculateHistory(remainingOps)
+                let (result, remainder) = getDescription(remainingOps)
                 finished = remainder.isEmpty
                 remainingOps = remainder
                 stackResults = (result ?? "") + (stackResults == "" ? "" : ", ") + stackResults
@@ -66,7 +68,7 @@ class CalculatorBrain {
         }
     }
     
-    private func calculateHistory(ops : [Op]) -> (result: String?, remainingOps: [Op]) {
+    private func getDescription(ops : [Op]) -> (result: String?, remainingOps: [Op]) {
         if(!ops.isEmpty){
             var remOps = ops
             let op = remOps.removeLast()
@@ -79,16 +81,16 @@ class CalculatorBrain {
                 
                 println("\(symbol) evaluate...")
                 
-                let opeval = calculateHistory(remOps)
+                let opeval = getDescription(remOps)
                 return (" \(symbol)(\(opeval.result!))", opeval.remainingOps)
                 
             case .BinaryOperation(let symbol, let operation, _):
                 
                 println("\(symbol) evaluate...")
                 
-                let opeval = calculateHistory(remOps)
+                let opeval = getDescription(remOps)
                 if let operand1 = opeval.result {
-                    let opeval2 = calculateHistory(opeval.remainingOps)
+                    let opeval2 = getDescription(opeval.remainingOps)
                     if let operand2 = opeval2.result {
                         println("Op1.rem: \(opeval.remainingOps) :: \(opeval.result), Op2.rem: \(opeval2.remainingOps)  :: \(opeval2.result)")
                         if opeval2.remainingOps.isEmpty && opeval.remainingOps.isEmpty {
@@ -126,6 +128,7 @@ class CalculatorBrain {
         knowOps["π"] = Op.NullaryOperation("π") {M_PI}
     }
     
+    // Used with multiple operations - thus a func is better
     func isOperandmissing(op1: Double?, op2: Double?) -> String? {
         if let op1Val = op1 {
             if let op2Val = op2 {
@@ -135,79 +138,100 @@ class CalculatorBrain {
         return "Err: missing operand"
     }
     
-    private func evaluate(ops: [Op]) ->  (result: Double?, remOps: [Op]) {
+    
+    
+    
+    // MARK: Stack evaluation
+    
+    private func evaluate(ops: [Op]) ->  (result: Double?, remainingOps: [Op]) {
     
         if(!ops.isEmpty){
             var remOps = ops
             let op = remOps.removeLast()
             switch op{
-            case .Operand(let operand):
-                println("<\(operand)>")
-                return (operand, remOps)
-            case .UnaryOperation(let symbol, let operation, let errorTest):
-  
-                println("\(symbol) evaluate...")
+            
+                case .Operand(let operand):
+                    println("<\(operand)>")
+                    return (operand, remOps)
                 
-                let opeval = evaluate(remOps)
-                if let operand = opeval.result {
-                    if let error = errorTest?(operand) {
-                        errorStack.append(error)
-                        println(errorStack)
-                    }
-                    return (operation(operand), opeval.remOps)
-                }
-                
-            case .BinaryOperation(let symbol, let operation, let errorTest):
-                
-                println("\(symbol) evaluate...")
-                
-                let opeval = evaluate(remOps)
-                if let operand1 = opeval.result {
-                    let opeval2 = evaluate(opeval.remOps)
-                    if let operand2 = opeval2.result {
-                        if let error = errorTest?(operand1, operand2) {
+                case .UnaryOperation(let symbol, let operation, let errorTest):
+      
+                    println("\(symbol) evaluate...")
+                    
+                    let opeval = evaluate(remOps)
+                    if let operand = opeval.result {
+                        if let error = errorTest?(operand) {
                             errorStack.append(error)
-                            println(errorStack)
+                            println("Unary operation failed: \(errorStack)")
+                            return(nil, opeval.remainingOps)
                         }
-                        return (operation(operand1, operand2), opeval2.remOps)
+                        return (operation(operand), opeval.remainingOps)
+                    }
+                    
+                case .BinaryOperation(let symbol, let operation, let errorTest):
+                    
+                    println("\(symbol) evaluate...")
+                    
+                    let opeval = evaluate(remOps)
+                    if let operand1 = opeval.result {
+                        let opeval2 = evaluate(opeval.remainingOps)
+                        if let operand2 = opeval2.result {
+                            if let error = errorTest?(operand1, operand2) {
+                                errorStack.append(error)
+                                println(errorStack)
+                            }
+                            return (operation(operand1, operand2), opeval2.remainingOps)
+                        } else {
+                            if let error = errorTest?(operand1, nil) {
+                                errorStack.append(error)
+                                println(errorStack)
+                            }
+                        }
                     } else {
-                        if let error = errorTest?(operand1, nil) {
+                        if let error = errorTest?(nil, nil) {
                             errorStack.append(error)
                             println(errorStack)
                         }
                     }
-                } else {
-                    if let error = errorTest?(nil, nil) {
+                case .Variable(let symbol, let operation, let errorTest):
+                    println("\(symbol): \(variableValues[symbol] ?? 0)")
+                    if let error = errorTest?(symbol) {
                         errorStack.append(error)
                         println(errorStack)
+                        return (nil, remOps)
                     }
-                }
-            case .Variable(let symbol, let operation, let errorTest):
-                println("\(symbol): \(variableValues[symbol] ?? 0)")
-                if let error = errorTest?(symbol) {
-                    errorStack.append(error)
-                    println(errorStack)
-                }
-                return (operation(symbol) ?? 0, remOps)
-                
-            case .NullaryOperation(let symbol, let operation):
-                return (operation(), remOps)
+                    return (operation(symbol), remOps)
+                    
+                case .NullaryOperation(let symbol, let operation):
+                    return (operation(), remOps)
             }
         }
         return (nil, ops)
     }
     
     func evaluate() -> Double? {
+        println("---------------------------")
+        println("evaluate")
+        
+        // Clear the error stack
         errorStack.removeAll()
-        println("evaluate()...")
+        
         let (result, _) = evaluate(opStack)
         return result
     }
+
+    func evaluateAndReportErrors() -> String? {
+        evaluate()
+        return lastError
+    }
     
+    
+    
+    // MARK: Stack operations
+    
+    // Adds a new operand
     func pushOperand(operand: Double) -> Double?{
-        
         println("pushOperand number \(operand)")
-        
         opStack.append(Op.Operand(operand))
         
         return evaluate()
@@ -215,19 +239,21 @@ class CalculatorBrain {
     
     
     
-    /*
-        Valtozok letrehozasa, inicializalasa es kinyerese.
-    */
+    // Create a new variable - adds it to stack
     func pushOperand(symbol: String) -> Double? {
         // Default value, but see project 2 extra 3 -> should display error if variable has not been set
         //variableValues[symbol] = 0
-        opStack.append(Op.Variable(symbol, { self.variableValues[$0] }, { (symbol: String?) -> String? in
-                if let varValue = self.variableValues[symbol!] {
-                    return nil
-                } else {
-                    return "Err: missing variable value"
+        opStack.append(Op.Variable(
+                symbol,
+                { self.variableValues[$0] },
+                { (symbol: String?) -> String? in
+                    if let varValue = self.variableValues[symbol!] {
+                        return nil
+                    } else {
+                        return "Err: missing variable value"
+                    }
                 }
-            })
+            )
         )
         
         return evaluate()
@@ -244,18 +270,23 @@ class CalculatorBrain {
         return evaluate()
     }
     
+    
+    
+    
+    // MARK: Reset and undo
+    
     func reset() {
         errorStack.removeAll()
         opStack.removeAll()
         variableValues.removeAll()
     }
     
-    func undoLast() {
-        if opStack.isEmpty {
-            return
+    // Extra #2
+    func undoLast() -> Double? {
+        if !opStack.isEmpty {
+            opStack.removeLast()
         }
-        opStack.removeLast()
-        evaluate()
+        return evaluate()
     }
     
 }
