@@ -121,8 +121,7 @@ class ViewController: UIViewController {
             enter()
         }
         if let symbol = sender.currentTitle {
-            brain.pushOperand(symbol)
-            brain.evaluate()
+            displayValue = brain.pushOperand(symbol)
             updateHistoryLabel(false)
         }
     }

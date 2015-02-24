@@ -57,12 +57,12 @@ class CalculatorBrain {
             var stackResults = ""
             var remainingOps = opStack
             var finished = false
-            do {
+            
+            while !remainingOps.isEmpty {
                 let (result, remainder) = getDescription(remainingOps)
-                finished = remainder.isEmpty
                 remainingOps = remainder
                 stackResults = (result ?? "") + (stackResults == "" ? "" : ", ") + stackResults
-            } while !finished
+            }
 
             return stackResults
         }
