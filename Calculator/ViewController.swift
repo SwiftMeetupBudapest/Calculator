@@ -49,18 +49,18 @@ class ViewController: UIViewController {
         println("digit = \(digit)")
         
         if (userIsInTheMiddleOfTyping) {
-            var digitAppendable = true
             
             if (digit == ".") && (digitsLabel.text!.rangeOfString(".") != nil) {
-                digitAppendable = false
+                return
             }
-
-            if digitAppendable {
-                digitsLabel.text = digitsLabel.text! + digit
-            }
+            
+            digitsLabel.text = digitsLabel.text! + digit
+            
         } else {
+            
             digitsLabel.text = digit
             userIsInTheMiddleOfTyping = true
+            
         }
         updateHistoryLabel(false)
     }
