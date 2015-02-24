@@ -2,8 +2,8 @@
 //  KalkulatorBrain.swift
 //  Kalkulator
 //
-//  Created by Petneházi Károly on 2015.02.17..
-//  Copyright (c) 2015 Petneházi Károly. All rights reserved.
+//  Created by Géza Mikló on 03/02/15.
+//  Copyright (c) 2015 Géza Mikló. All rights reserved.
 //
 
 import Foundation
@@ -42,7 +42,13 @@ class CalculatorBrain {
     private var opStack=Array<Op>()
     private var knowOps = Dictionary<String, Op>()
     var variableValues = Dictionary<String, Double>()
-    var lastError = ""
+    var errorStack = Array<String>()
+
+    var lastError : String {
+        get {
+            return errorStack.isEmpty ? "" : errorStack.last!
+        }
+    }
     
     var description: String? {
         get {
@@ -97,7 +103,7 @@ class CalculatorBrain {
                     }
                 }
             case .Variable(let symbol, _, _):
-                println("\(symbol):\(variableValues[symbol]!)")
+                println("\(symbol):\(variableValues[symbol]?)")
                 return (" \(symbol) ", remOps)
             case .NullaryOperation(let symbol, _):
                 return (" \(symbol) ", remOps)
@@ -145,8 +151,8 @@ class CalculatorBrain {
                 let opeval = evaluate(remOps)
                 if let operand = opeval.result {
                     if let error = errorTest?(operand) {
-                        lastError = error
-                        println(lastError)
+                        errorStack.append(error)
+                        println(errorStack)
                     }
                     return (operation(operand), opeval.remOps)
                 }
@@ -160,27 +166,27 @@ class CalculatorBrain {
                     let opeval2 = evaluate(opeval.remOps)
                     if let operand2 = opeval2.result {
                         if let error = errorTest?(operand1, operand2) {
-                            lastError = error
-                            println(lastError)
+                            errorStack.append(error)
+                            println(errorStack)
                         }
                         return (operation(operand1, operand2), opeval2.remOps)
                     } else {
                         if let error = errorTest?(operand1, nil) {
-                            lastError = error
-                            println(lastError)
+                            errorStack.append(error)
+                            println(errorStack)
                         }
                     }
                 } else {
                     if let error = errorTest?(nil, nil) {
-                        lastError = error
-                        println(lastError)
+                        errorStack.append(error)
+                        println(errorStack)
                     }
                 }
             case .Variable(let symbol, let operation, let errorTest):
                 println("\(symbol): \(variableValues[symbol] ?? 0)")
                 if let error = errorTest?(symbol) {
-                    lastError = error
-                    println(lastError)
+                    errorStack.append(error)
+                    println(errorStack)
                 }
                 return (operation(symbol) ?? 0, remOps)
                 
@@ -192,7 +198,7 @@ class CalculatorBrain {
     }
     
     func evaluate() -> Double? {
-        lastError = ""
+        errorStack.removeAll()
         println("evaluate()...")
         let (result, _) = evaluate(opStack)
         return result
@@ -213,8 +219,16 @@ class CalculatorBrain {
         Valtozok letrehozasa, inicializalasa es kinyerese.
     */
     func pushOperand(symbol: String) -> Double? {
-//        variableValues[symbol] = 0
-        opStack.append(Op.Variable(symbol, { self.variableValues[$0] }, { (symbol: String?) -> String? in if let varValue = self.variableValues[symbol!] { return nil  } else { return "Err: missing variable value" } }))
+        // Default value, but see project 2 extra 3 -> should display error if variable has not been set
+        //variableValues[symbol] = 0
+        opStack.append(Op.Variable(symbol, { self.variableValues[$0] }, { (symbol: String?) -> String? in
+                if let varValue = self.variableValues[symbol!] {
+                    return nil
+                } else {
+                    return "Err: missing variable value"
+                }
+            })
+        )
         
         return evaluate()
     }
@@ -223,27 +237,15 @@ class CalculatorBrain {
 
         if let operation = knowOps[symbol]{
             opStack.append(operation)
+        } else {
+            errorStack.append("Err: invalid operation \(symbol)")
         }
 
         return evaluate()
     }
-    
-    func pushSign(symbol: String?) -> Double? {
-        
-        if symbol! == "C"{
-            reset()
-        }else if symbol! == "CE"{
-            if !opStack.isEmpty {
-                opStack.removeLast()
-            }
-        }
-    
-        return evaluate()
-    }
-
     
     func reset() {
-        lastError = ""
+        errorStack.removeAll()
         opStack.removeAll()
         variableValues.removeAll()
     }
@@ -252,7 +254,6 @@ class CalculatorBrain {
         if opStack.isEmpty {
             return
         }
-        lastError = ""
         opStack.removeLast()
         evaluate()
     }
