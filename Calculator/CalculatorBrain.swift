@@ -147,28 +147,28 @@ class CalculatorBrain {
                     
                     let op1Evaluation = getDescription(remOps)
                     if var operand1 = op1Evaluation.result {
-                        println("\topeval \(op1Evaluation.result) \(precedence) \(op1Evaluation.precedence)")
+                        println("1. opeval1 precedence: \(op1Evaluation.precedence) - \(symbol)(\(op.precedence)::\(precedence)) ___")
 
                         if op.precedence > op1Evaluation.precedence {
                             operand1 = "(\(operand1))"
                         }
                         
                         let op2Evaluation = getDescription(op1Evaluation.remainingOps)
+
                         println("\t\topeval2 \(op2Evaluation.result) \(precedence) \(op2Evaluation.precedence)")
 
                         if var operand2 = op2Evaluation.result {
                             println("\t\tOp1.rem: \(op1Evaluation.remainingOps) :: \(op1Evaluation.result), Op2.rem: \(op2Evaluation.remainingOps)  :: \(op2Evaluation.result)")
                             
                             println("\nParantheses \(precedence) ? \(op.precedence) ? \(op1Evaluation.precedence) ? \(op2Evaluation.precedence)")
-                            
-                            println("opeval1 precedence: \(op1Evaluation.precedence) - \(symbol)(\(op.precedence)::\(precedence)) - \(op2Evaluation.precedence)")
+                            println("2. opeval1 precedence: \(op1Evaluation.precedence) - \(symbol)(\(op.precedence)::\(precedence)) - \(op2Evaluation.precedence)")
                             
                             
                             if op.precedence > op2Evaluation.precedence {
                                 operand2 = "(\(operand2))"
                             }
                             
-                            return ("(\(operand2) \(symbol) \(operand1))", op2Evaluation.remainingOps, op2Evaluation.precedence)
+                            return ("\(operand2) \(symbol) \(operand1)", op2Evaluation.remainingOps, op.precedence)
                         }
                     }
                     return (nil, [], precedence)
