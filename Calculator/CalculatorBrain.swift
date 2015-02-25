@@ -69,48 +69,55 @@ class CalculatorBrain {
     }
     
     private func getDescription(ops : [Op]) -> (result: String?, remainingOps: [Op]) {
-        if(!ops.isEmpty){
+        if !ops.isEmpty {
             var remOps = ops
             let op = remOps.removeLast()
             switch op {
-            case .Operand(let operand):
-                println("<\(operand)>")
-                return (operand.description, remOps)
-                
-            case .UnaryOperation(let symbol, let operation, _):
-                
-                println("\(symbol) evaluate...")
-                
-                let opeval = getDescription(remOps)
-                return (" \(symbol)(\(opeval.result!))", opeval.remainingOps)
-                
-            case .BinaryOperation(let symbol, let operation, _):
-                
-                println("\(symbol) evaluate...")
-                
-                let opeval = getDescription(remOps)
-                if let operand1 = opeval.result {
-                    let opeval2 = getDescription(opeval.remainingOps)
-                    if let operand2 = opeval2.result {
-                        println("Op1.rem: \(opeval.remainingOps) :: \(opeval.result), Op2.rem: \(opeval2.remainingOps)  :: \(opeval2.result)")
-                        if opeval2.remainingOps.isEmpty && opeval.remainingOps.isEmpty {
-                            return ("\(operand2) \(symbol) \(operand1)", opeval2.remainingOps)
+                case .Operand(let operand):
+                    println("<\(operand)>")
+                    return (operand.description, remOps)
+                    
+                case .UnaryOperation(let symbol, let operation, _):
+                    
+                    println("\(symbol) desc...")
+                    
+                    let opeval = getDescription(remOps)
+                    return (" \(symbol)(\(opeval.result!))", opeval.remainingOps)
+                    
+                case .BinaryOperation(let symbol, let operation, _):
+                    
+                    println("\(symbol) desc...")
+                    
+                    let opeval = getDescription(remOps)
+                    if let operand1 = opeval.result {
+                        println("opeval \(opeval)")
+
+                        let opeval2 = getDescription(opeval.remainingOps)
+                        println("opeval2 \(opeval2)")
+
+                        if let operand2 = opeval2.result {
+                            println("Op1.rem: \(opeval.remainingOps) :: \(opeval.result), Op2.rem: \(opeval2.remainingOps)  :: \(opeval2.result)")
+                            
+                            if opeval2.remainingOps.isEmpty && opeval.remainingOps.isEmpty {
+                                return ("\(operand2) \(symbol) \(operand1)", opeval2.remainingOps)
+                            }
+                            
+                            if opeval2.remainingOps.count > 1 {
+                                return ("(\(operand2)) \(symbol) \(operand1)", opeval2.remainingOps)
+                            }
+                            
+                            return ("(\(operand2) \(symbol) \(operand1))", opeval2.remainingOps)
                         }
-                        
-                        if opeval2.remainingOps.count > 1 {
-                            return ("(\(operand2)) \(symbol) \(operand1)", opeval2.remainingOps)
-                        }
-                        
-                        return ("(\(operand2) \(symbol) \(operand1))", opeval2.remainingOps)
                     }
-                }
-            case .Variable(let symbol, _, _):
-                println("\(symbol):\(variableValues[symbol]?)")
-                return (" \(symbol) ", remOps)
-            case .NullaryOperation(let symbol, _):
-                return (" \(symbol) ", remOps)
+                    return (nil, [])
+                case .Variable(let symbol, _, _):
+                    println("\(symbol):\(variableValues[symbol]?)")
+                    return (" \(symbol) ", remOps)
+                case .NullaryOperation(let symbol, _):
+                    return (" \(symbol) ", remOps)
             }
         }
+        
         return (nil, ops)
     }
     
