@@ -42,6 +42,7 @@ class CalculatorBrain {
     private var opStack=Array<Op>()
     private var knowOps = Dictionary<String, Op>()
     var variableValues = Dictionary<String, Double>()
+    
     var errorStack = Array<String>()
 
     var lastError : String {
@@ -253,6 +254,8 @@ class CalculatorBrain {
         opStack.append(Op.Variable(
                 symbol,
                 { self.variableValues[$0] },
+            
+            
                 { (symbol: String?) -> String? in
                     if let varValue = self.variableValues[symbol!] {
                         return nil
