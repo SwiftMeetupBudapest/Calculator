@@ -62,9 +62,10 @@ class CalculatorBrain {
     
     private func calculateHistory(ops : [Op], _ preSymbol: String?) -> (result: String?, remainingOps: [Op]) {
         
+        var remOps = ops
         
         if(!ops.isEmpty){
-            var remOps = ops
+            
             let op = remOps.removeLast()
             
             
@@ -105,7 +106,7 @@ class CalculatorBrain {
                 return (" \(symbol) ", remOps)
             }
         }
-        return (nil, ops)
+        return (nil, remOps)
     }
     
     ///
