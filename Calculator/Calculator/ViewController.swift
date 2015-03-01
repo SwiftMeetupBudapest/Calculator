@@ -59,7 +59,7 @@ class ViewController: UIViewController {
         case "√": performOperation { sqrt($0) }
         case "sin": performOperation { sin($0) }
         case "cos": performOperation { cos($0) }
-        case "π": performOperation()
+        case "π": performOperation(M_PI)
         case "±": performOperation { $0 * -1 }
         default: break
         }
@@ -78,9 +78,9 @@ class ViewController: UIViewController {
             displayValue = operation(operandStack.removeLast())
         }
     }
-    
-    func performOperation() {
-        displayValue = M_PI
+
+    func performOperation(constant: Double) {
+        displayValue = constant
     }
 
     @IBAction func enter() {
