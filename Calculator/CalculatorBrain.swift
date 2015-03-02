@@ -69,6 +69,28 @@ class CalculatorBrain {
 
     }
     
+    typealias PropertyList = AnyObject // This helps reading the code
+    // To be able to save CalculatorBrain's opStack
+    var program: PropertyList { // Guaranteed to be PropertyList
+        get {
+            return opStack.map { $0.description }
+        }
+        
+        set {
+            if let opSymbols = newValue as? Array<String> {
+                var newOpStack = [Op]()
+                for opSymbol in opSymbols {
+                    if let op = knowOps[opSymbol] {
+                        newOpStack.append(op)
+                    } else if let operand = NSNumberFormatter().numberFromString(opSymbol)?.doubleValue {
+                        newOpStack.append(.Operand(operand))
+                    }
+                }
+                opStack = newOpStack
+            }
+        }
+    }
+    
     private var opStack=Array<Op>()
     private var knowOps = Dictionary<String, Op>()
     var variableValues = Dictionary<String, Double>()
