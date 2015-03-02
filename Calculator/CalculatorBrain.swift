@@ -88,7 +88,7 @@ class CalculatorBrain {
         }
         learnOp(Op.BinaryOperation("×", *, isOperandmissing, 100))
         learnOp(Op.BinaryOperation("+", {$0 + $1}, isOperandmissing, 50))
-        learnOp(Op.BinaryOperation("−", {$1 - $0}, isOperandmissing, 25))
+        learnOp(Op.BinaryOperation("−", {$1 - $0}, isOperandmissing, 50))
         learnOp(Op.BinaryOperation("÷", {$1 / $0}, { self.isOperandmissing($1, op2: $0) ?? ($0 == 0 ? "Err: Division by zero" : nil)}, 100))
         learnOp(Op.UnaryOperation("sin", {sin($0)}, nil))
         learnOp(Op.UnaryOperation("cos", {cos($0)}, nil))
